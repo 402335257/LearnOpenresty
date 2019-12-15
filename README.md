@@ -19,38 +19,69 @@ ffi是一个Lua库，可以在Lua中执行c代码。
 ## Openresty中默认集成的各种模块
 
 array-var-nginx-module 支持数组变量操作
+
 ngx_http_auth_request_module 鉴权用
+
 ngx_coolkit 一些nginx小扩展的集合，例如改写请求，请求里的一些变量
+
 echo-nginx-module 方便地输出一些信息 支持异步和同步
+
 encrypted-session-nginx-module 变量加解密
+
 form-input-nginx-module 读取表单信息放到nginx变量里
+
 headers-more-nginx-module header修改
+
 memc-nginx-module  memcached操作
+
 rds-csv-nginx-module rds转换为csv格式
+
 set-misc-nginx-module 各种set指令
+
 srcache-nginx-module 构造location的请求
+
 stream-lua-nginx-module 实现lua的tcp/udp服务器
+
 xss-nginx-module 跨域请求
 
 下面像是实现了lua的各种标准库
+
 lua-cjson json库
+
 lua-rds-parser  解析Resty-DBD-Streams 这些数据是ngx_drizzle  
+
 和ngx_postgres返回的
+
 lua-redis-parser redis操作库
+
 lua-resty-core 一些基于ffi的常用api
+
 lua-resty-dns dns解析的库
+
 lua-resty-lock 锁
+
 lua-resty-lrucache lrucache的实现
+
 lua-resty-memcached lua操作memcached
+
 lua-resty-mysql lua操作mysql
+
 lua-resty-string lua字符串工具
+
 lua-resty-upload 文件上传
+
 lua-resty-upstream-healthcheck 健康检查
+
 lua-resty-websocket websocket客户端
+
 lua-resty-limit-traffic 限流
+
 lua-resty-shell shell调用
+
 lua-resty-signal linux下进程信号
+
 lua-tablepool 实现了table池，频繁地申请临时table使用这个更合适
+
 lua-upstream-nginx-module upstream api
 
 
