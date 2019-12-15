@@ -85,8 +85,19 @@ lua-tablepool 实现了table池，频繁地申请临时table使用这个更合�
 lua-upstream-nginx-module upstream api
 
 
+
+
 ##　OPM
 Openresty的模块管理器
+
+用法和pip类似，命名规则为: 用户名/模块名
+```
+opm search
+
+opm install
+
+opm list
+```
 
 ## 上手练习
 利用stream-lua-nginx-module里的udp实现一个简单的DNS服务器。
@@ -508,3 +519,92 @@ www.a.shifen.com.	50	IN	A	220.181.38.149
 ;; MSG SIZE  rcvd: 90
 
 ```
+
+
+##  学习火焰图
+
+一般是通过systemtap收集数据，然后通过FlameGraph展示出来。
+
+安装systemtap之后要安装对应内核版本的调试信息包，不然无法使用。
+
+ubuntu官网上的教程安装失败，直接下载deb包安装。
+
+
+```
+uame -a 查看内核版本信息
+
+wget http://ddebs.ubuntu.com/pool/main/l/linux/linux-image-unsigned-4.15.0-72-generic-dbgsym_4.15.0-72.81_amd64.ddeb
+
+sudo dpkg -i linux-image-4.15.0-72-generic-dbgsym_4.15.0-72.81_adm64.ddeb
+
+sudo stap -v -e 'probe begin { printf("Hello, World!\n"); exit() }'
+
+sudo stap -v -e 'probe vfs.read {printf("read performed\n"); exit()}'
+```
+
+
+使用stapxx工具包,里面有lj-lua-stacks.sxx
+
+
+执行samples/lj-lua-stacks.sxx报错
+
+```
+
+ ./samples/lj-lua-stacks.sxx --skip-badvars -x 11097 > /tmp/ngx_cpu.bt
+
+semantic error: while processing function luajit_G
+
+semantic error: unable to find member 'ptr32' for struct MRef (alternatives: ptr64): operator '->' at stapxx-U3mI95ou/luajit.stp:162:98
+
+```
+看github上的issue上是这个工具不支持最新的Openresty,新版本默认是GC64？
+
+按照错误提示将luajit_gc64.sxx替换luajit.sxx
+
+再执行， 执行成功但是文件为空......
+```
+Found exact match for libluajit: /usr/local/openresty/luajit/lib/libluajit-5.1.so.2.1.0
+symbolmap: 00000001: invalid section
+WARNING: Start tracing 11097 (/usr/local/openresty/nginx/sbin/nginx)
+WARNING: Please wait for 5 seconds...
+WARNING: Time's up. Quitting now...
+WARNING: Found 0 JITted samples.
+```
+
+使用./samples/luajit21-gc64/lj-vm-states.sxx --arg time=5  -x 11097
+vmstate输出都为-2，所以上面采集不到JITed的样本。
+
+```
+Start tracing 11097 (/usr/local/openresty/nginx/sbin/nginx)
+Please wait for 5 seconds...
+
+Observed 450 Lua-running samples and ignored 0 unrelated samples.
+C Code (by interpreted Lua): 100% (450 samples)
+```
+
+google没发现什么类似的问题，后来发现应该和lua_code_cache off有关系，关掉了就能采集到了....，然后因为采样的方法，请求的量也不能太少。
+
+```
+0xffffffff94e6bef5
+C:ngx_http_lua_socket_tcp_connect
+@/usr/local/openresty/site/lualib/resty/mysql.lua:538
+@/home/wang/project/openresty_dir/lua-script/mysql.lua:0
+	47
+0xffffffff94e6bef5
+C:ngx_http_lua_socket_tcp_receive
+@/usr/local/openresty/site/lualib/resty/mysql.lua:250
+@/usr/local/openresty/site/lualib/resty/mysql.lua:538
+@/home/wang/project/openresty_dir/lua-script/mysql.lua:0
+
+```
+
+使用fix-lua-bt工具转换,再生成svg
+```
+./fix-lua-bt a.bt flame.bt
+./stackcollapse-stap.pl ../stapxx/flame.bt  > flame.cbt
+./flamegraph.pl flame.cbt >flame.svg
+```
+
+
+
+
