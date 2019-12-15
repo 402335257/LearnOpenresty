@@ -85,9 +85,8 @@ lua-tablepool 实现了table池，频繁地申请临时table使用这个更合�
 lua-upstream-nginx-module upstream api
 
 
-
-
 ##　OPM
+
 Openresty的模块管理器
 
 用法和pip类似，命名规则为: 用户名/模块名
