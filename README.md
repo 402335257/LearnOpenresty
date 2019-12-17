@@ -1,3 +1,5 @@
+[toc]
+
 ## Openresty是什么
 相比Nginx，增加了对Lua的支持，可以方便的扩展功能。
 
