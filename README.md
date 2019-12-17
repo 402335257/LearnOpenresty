@@ -605,4 +605,70 @@ C:ngx_http_lua_socket_tcp_receive
 
 
 
+## FFI使用
 
+在lua里调用c代码，在某些场景可以提升效率。需要先将C代码编译成动态库(.so文件),然后通过ffi加载c模块，cdef声明函数之后就可以使用C函数了，与C的头文件声明一样。
+
+C与Lua的变量存在对应关系，使用的时候需要转换。
+
+counter.c
+
+```
+int count(char *str) {
+    int c=0;
+    char *p = str;
+    while (*p != '\0')
+    {
+        c++;
+        p++;
+    }
+    return c;
+}
+
+```
+
+编译成动态库
+
+```
+gcc -g -o libcounter.so -fpic -shared counter.c
+```
+
+nginx.conf里指定了lua_package_cpath发现没有起作用，先扔到/usr/lib/底下测试，调用成功。
+
+```
+lua_package_cpath 'lua-so/?.so;;';
+```
+
+usec.lua
+```
+local ffi = require 'ffi'
+local myffi = ffi.load('counter')
+
+-- 定义函数
+ffi.cdef[[
+    int count(char *str);
+]]
+
+local data = ngx.req.get_uri_args()['data']
+
+local data_c = ffi.new('char[?]', #data)
+ffi.copy(data_c, data)
+local count = myffi.count(data_c)
+
+ngx.say(count)
+
+```
+
+回过头来看lua_package_cpath不生效的问题，在log里打印package.cpath,输出为
+
+```
+cpath:lua-so/?.so;/usr/local/openresty/site/lualib/?.so;/usr/local/openresty/lualib/?.so;./?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/openresty/luajit/lib/lua/5.1/?.so;/usr/local/lib/lua/5.1/loadall.so;
+```
+
+最后发现这个lua_package_cpath和ffi加载so库无关，只和系统的ldconfig有关系。
+
+```
+往/etc/ld.so.conf.d/***.conf里添加so库
+
+执行ldconfig
+```
