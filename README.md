@@ -1,5 +1,3 @@
-[toc]
-
 ## Openresty是什么
 相比Nginx，增加了对Lua的支持，可以方便的扩展功能。
 
@@ -674,3 +672,10 @@ cpath:lua-so/?.so;/usr/local/openresty/site/lualib/?.so;/usr/local/openresty/lua
 
 执行ldconfig
 ```
+
+
+## 协程
+
+ngx.thread.spawn() 和 coroutine.create()
+
+ngx.thread创建的协程会由ngx_lua自动调度， coroutine创建的协程需要手动地执行resume。
