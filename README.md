@@ -760,3 +760,17 @@ local t2 = ngx.thread.spawn(work3)
 ngx.thread.wait(t1, t2)
 ngx.log(ngx.INFO, "work3 cost seconds:", ngx.time() - start)
 ```
+
+大致看了一下ngx.sleep非阻塞实现，调用ngx.sleep之后实际上是往ngx_event_timer_rbtree里添加了定时器，然后执行yield，接着会执行其他的lua协程。然后时间到了之后会回调ngx_http_lua_sleep_handler， resume后继续往下执行。因为在sleep的过程中依靠的是nginx里的定时器，所以不会阻塞其他的请求。
+
+```
+
+ngx_add_timer(&coctx->sleep, (ngx_msec_t) delay);
+
+lua_yield(L, 0);
+
+ngx_http_lua_sleep_resume
+```
+
+
+
