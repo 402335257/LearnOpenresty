@@ -774,3 +774,33 @@ ngx_http_lua_sleep_resume
 
 
 
+## Socks5代理实现思路
+
+- socks5相比http协议工作在更下面一层，通过tcp创建连接。所以选用stream-lua模块来实现。
+
+- 协议认证，认证完之后建立连接
+
+- 协议认证完之后客户端就可以发送请求报文
+
+客户端和服务端之间应该用长连接，这里ngx.req.socket(true)使用raw socket。
+
+根据客户端的请求报文选择使用ngx.socket.tcp() ngx.socket.udp()， 使用keepalive可以保持代理服务器与目标服务器的长连接。
+
+```
+local ngx = require 'ngx'
+
+-- 设置为长连接
+local sock = ngx.req.socket(true)
+
+-- socks5认证相关
+
+-- 认证成功后
+while true do
+    local data = sock:receive()
+    ngx.log(ngx.INFO, "receive:", data)
+    -- 获取请求报文，根据请求报文是tcp转发还是udp转发，使用对应的请求
+    -- ngx.socket.tcp 或者 ngx.socket.udp
+    -- 这里设置keepalive，放入内置的连接池后会保持连接。
+    sock:send(data)
+end
+```
