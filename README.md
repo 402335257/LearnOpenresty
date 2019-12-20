@@ -801,6 +801,11 @@ while true do
     -- 获取请求报文，根据请求报文是tcp转发还是udp转发，使用对应的请求
     -- ngx.socket.tcp 或者 ngx.socket.udp
     -- 这里设置keepalive，放入内置的连接池后会保持连接。
-    sock:send(data)
+    if data ~= nil then
+        sock:send(data)
+    else
+        -- 断开连接
+        break
+    end
 end
 ```
