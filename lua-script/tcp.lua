@@ -49,13 +49,17 @@ end
 
 
 local function transfer(sock1, sock2, tag)
+    local data
     while true do
-        local data = sock1:receive(1)
+        data = sock1:receive(1)
         ngx.log(ngx.INFO, tag..' receive:', data)
         if data ~= nil then
             sock2:send(data)
         else
-            -- 连接断开
+            -- ngx.req.socket没有close
+            if tag == 'remote' then
+                sock1:close()
+            end
             break
         end
 
@@ -82,7 +86,6 @@ if err ~= nil then
 end
 
 -- 创建两个轻线程互相转发数据
-
 local t1 = ngx.thread.spawn(transfer, sock, dst_sock, 'client')
 local t2 = ngx.thread.spawn(transfer, dst_sock, sock, 'remote')
 ngx.thread.wait(t1, t2)
