@@ -14,30 +14,9 @@
 - cosocket的api不支持bind方法，所以只能实现connect。
 - 因为socks5协议不需要关心数据格式，而在测试过程中发下cosocket里的receive会根据pattern '*l'来判断是否结束接收。而ngx.req.socket不支持receiveany方法。所以数据的接收比较麻烦，这里直接用了receive(1)，效率比较低。
 
-```
-local ngx = require 'ngx'
 
--- 设置为长连接
-local sock = ngx.req.socket(true)
 
--- socks5认证相关
-
--- 认证成功后
-while true do
-    local data = sock:receive()
-    ngx.log(ngx.INFO, "receive:", data)
-    -- 获取请求报文，根据请求报文是tcp转发还是udp转发，使用对应的请求
-    -- ngx.socket.tcp 或者 ngx.socket.udp
-    -- 这里设置keepalive，放入内置的连接池后会保持连接。
-    if data ~= nil then
-        sock:send(data)
-    else
-        -- 断开连接
-        break
-    end
-end
-```
-
+以下为实现代码
 
 ```
 local ngx = require 'ngx'
