@@ -36,8 +36,8 @@ install:
   - if [ ! -f download-cache/openresty-$OPENRESTY_VER.tar.gz ]; then wget -P download-cache https://openresty.org/download/openresty-$OPENRESTY_VER.tar.gz;fi
 
 script: 
-  - tar -xzf download-cache/apache-zookeeper-$ZK_VER-bin.tar.gz -C /usr/local/
-  - tar -xzf download-cache/kafka_$SCALA_VER-$KAFKA_VER.tgz -C /usr/local/
+  - sudo tar -xzf download-cache/apache-zookeeper-$ZK_VER-bin.tar.gz -C /usr/local/
+  - sudo tar -xzf download-cache/kafka_$SCALA_VER-$KAFKA_VER.tgz -C /usr/local/
   - sudo mv /usr/local/kafka_$SCALA_VER-$KAFKA_VER /usr/local/kafka
   - sudo mv /usr/local/apache-zookeeper-$ZK_VER-bin /usr/local/zookeeper
   - sudo cp /usr/local/zookeeper/conf/zoo_sample.cfg /usr/local/zookeeper/conf/zoo.cfg
