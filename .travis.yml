@@ -54,5 +54,5 @@ script:
   - cd openresty-$OPENRESTY_VER 
   - ./configure --prefix=/usr/local/openresty-debug --with-debug > build.log 2>&1 || (cat build.log && exit 1) 
   - make -j$JOBS > build.log 2>&1 || (cat build.log && exit 1)  
-  - make install > build.log 2>&1 || (cat build.log && exit 1) 
+  - sudo make install > build.log 2>&1 || (cat build.log && exit 1) 
   - cd .. 
